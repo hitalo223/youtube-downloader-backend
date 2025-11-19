@@ -1,0 +1,52 @@
+const express = require("express");
+const cors = require("cors");
+const { exec } = require("child_process");
+const path = require("path");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ROTA PRINCIPAL PARA BAIXAR O VÍDEO
+app.post("/download", (req, res) => {
+    const { url, quality, start, end, type } = req.body;
+
+    if (!url) {
+        return res.status(400).json({ error: "URL do vídeo é obrigatória." });
+    }
+
+    const output = path.join(__dirname, "download.mp4");
+
+    // Comando base do yt-dlp
+    let cmd = `yt-dlp "${url}" -o "${output}"`;
+
+    // Tipo de download
+    if (type === "video") {
+        cmd += ` -f "${quality || "best"}"`;
+    } else if (type === "audio") {
+        cmd += ` -f "bestaudio"`;
+    }
+
+    // Baixar apenas um trecho (opcional)
+    if (start && end) {
+        cmd += ` --download-sections "*${start}-${end}"`;
+    }
+
+    console.log("Executando:", cmd);
+
+    // Executa o comando
+    exec(cmd, (error) => {
+        if (error) {
+            console.error("Erro:", error);
+            return res.status(500).send("Erro ao baixar o vídeo.");
+        }
+
+        // Envia o arquivo para download
+        res.download(output, "video.mp4", (err) => {
+            if (err) console.error("Erro ao enviar:", err);
+        });
+    });
+});
+
+// Porta usada no Render
+app.listen(10000, () => console.log("Backend rodando na porta 10000"));
