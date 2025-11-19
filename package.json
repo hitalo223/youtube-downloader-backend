@@ -2,15 +2,15 @@
   "name": "backend-ytdlp",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "yt-dlp --update"
+    "postinstall": "pip install yt-dlp"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "yt-dlp-exec": "^1.4.3",
     "cors": "^2.8.5"
   }
 }
+
+
 
